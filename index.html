@@ -170,6 +170,40 @@ body.reading .nav{display:none}
 .tg[aria-checked="true"]{background:var(--accent)}.tg[aria-checked="true"]::after{transform:translateX(20px)}
 .about{color:var(--muted);font-size:12.5px;line-height:1.6;margin:6px 0 0}
 .toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);max-width:88%;text-align:center}
+/* ---- mots, glossaire, explications ---- */
+.w{border-radius:6px}
+.sheet .w{cursor:pointer;padding:0 .08em}
+.sheet .w.sel{background:var(--hl);box-shadow:0 0 0 2px var(--hl)}
+.acts.sm{margin-bottom:4px}
+.acts.sm .btn{min-width:0;padding:9px 6px;font-size:14px;gap:6px}
+.acts.sm svg.i{width:18px;height:18px}
+.tabs{margin:12px 0 10px}
+.tabs button{font-size:13.5px}
+.tc{min-height:90px}
+.tc p{margin:0 0 .75em}
+.tc .fr{font-family:var(--serif);font-size:15.5px;line-height:1.6}
+.tc .rtl{direction:rtl;text-align:right;font-family:AQ,var(--ui);font-size:19px;line-height:2}
+.src{color:var(--muted);font-size:12px;line-height:1.5;margin:10px 0 0}
+.tc .hint,.hint2{color:var(--muted);font-size:13.5px;margin:4px 0 10px}
+.wc{border:1px solid var(--gold);border-radius:14px;padding:12px 14px;margin:0 0 12px;background:var(--surface2)}
+.wc .wt{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.wc .wa{font-family:AQ;font-size:30px;line-height:1.8;color:var(--accent)}
+.wc .ty{font-size:12.5px;color:var(--muted);text-align:right}
+.wc dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;align-items:baseline}
+.wc dt{font-size:12px;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.wc dd{margin:0;font-family:AQ;font-size:22px;line-height:1.8;direction:rtl;text-align:right}
+.wc dd.fr{font-family:var(--ui);font-size:14px;direction:ltr;text-align:left}
+.wc .btn{margin-top:10px;width:100%}
+.gl h3{margin:14px 0 2px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.gl .e{padding:8px 0;border-top:1px solid var(--line)}
+.gl .e:first-of-type{border-top:0}
+.gl .k{font-family:AQ;font-size:21px;line-height:1.9;direction:rtl;text-align:right;color:var(--accent)}
+.gl .m{direction:rtl;text-align:right;font-family:AQ,var(--ui);font-size:18.5px;line-height:1.9}
+.gl .e.hit{background:var(--hl);border-radius:10px;padding:8px 10px;border-top-color:transparent}
+.rbar .spc{display:block;width:44px}
+.more{display:block;width:100%;margin:14px 0 4px;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--accent);font-weight:500}
+.dl{margin-top:8px}
+.dl .btn{width:100%}
 .load{padding:80px 0;text-align:center;color:var(--muted)}
 .load .big{font-family:AQ;font-size:44px;color:var(--gold);display:block}
 </style>
@@ -241,7 +275,7 @@ const unitsOf = text => {
     if (tk === '۞') { pend = '<span class="hz">۞</span> '; continue; }
     if (WQ.has(tk)) { if (u.length) u[u.length - 1].m.push(`<span class="wq">${tk}</span>`); continue; }
     if (tk === '۩') { if (u.length) u[u.length - 1].m.push('<span class="sj">۩</span>'); continue; }
-    u.push({ w: pend + tk, m: [] }); pend = '';
+    u.push({ p: pend, w: tk, m: [] }); pend = '';
   }
   return u;
 };
@@ -250,7 +284,7 @@ function verseHTML(s, v, withNo = true) {
   const u = unitsOf(Q.t[s - 1][v - 1]);
   return u.map((x, i) => {
     const last = i === u.length - 1;
-    const body = x.w + (x.m.length ? ' ' + x.m.join(' ') : '');
+    const body = x.p + `<span class="w" data-w="${i}">${x.w}</span>` + (x.m.length ? ' ' + x.m.join(' ') : '');
     return (x.m.length || (last && withNo)) ? `<span class="nb">${body}${last && withNo ? ' ' + marker(v) : ''}</span>` : body;
   }).join(' ');
 }
@@ -360,7 +394,7 @@ function openReader(t, n, startVerse) {
       for (let v = v0; v <= v1; v++) {
         const fr = FR && settings.tr ? `<p class="frx">${esc(FR[s - 1][v - 1])}</p>` : '';
         html += `<article class="vr${isFav(s, v) ? ' fav' : ''}" data-s="${s}" data-v="${v}"><div class="top2"><span class="no ${v % 2 ? 'r' : 's'}">${ar(v)}</span><span>${s}:${v}</span><span class="sp"></span>
-          <button data-act="fav" aria-label="Favori" class="${isFav(s, v) ? 'on' : ''}">${ic('star')}</button><button data-act="copy" aria-label="Copier">${ic('copy')}</button></div>
+          <button data-act="def" aria-label="Définitions et explication">${ic('book')}</button><button data-act="fav" aria-label="Favori" class="${isFav(s, v) ? 'on' : ''}">${ic('star')}</button><button data-act="copy" aria-label="Copier">${ic('copy')}</button></div>
           <p class="arx">${verseHTML(s, v, false)}</p>${fr}</article>`;
       }
     }
@@ -378,24 +412,111 @@ function openReader(t, n, startVerse) {
     const s = +el.dataset.s, v = +el.dataset.v;
     if (b && b.dataset.act === 'fav') { const on = toggleFav(s, v); el.classList.toggle('fav', on); b.classList.toggle('on', on); toast(on ? 'Ajouté aux favoris' : 'Retiré des favoris'); }
     else if (b && b.dataset.act === 'copy') copyText(verseText(s, v), el.querySelector('.arx'));
-    else if (!b && settings.mode === 'flow') openVerse(s, v, el);
+    else if (b && b.dataset.act === 'def') openVerse(s, v, el);
+    else if (!b) { const w = e.target.closest('.w'); if (settings.mode === 'flow' || w) openVerse(s, v, el, w ? +w.dataset.w : undefined); }
   };
   const tgt = state.pending || (startVerse ? { s: t === 'sourate' ? n : segs[0][0], v: startVerse } : null);
   state.pending = null;
   window.scrollTo(0, 0);
   if (tgt) { const el = verseEls.find(x => +x.dataset.s === tgt.s && +x.dataset.v === tgt.v); if (el) requestAnimationFrame(() => { el.scrollIntoView({ block: 'start' }); }); }
   setNav('');
+  if (!store.get('q.tip', false)) { store.set('q.tip', true); setTimeout(() => toast('Touche un mot ou un verset pour sa définition'), 700); }
 }
 const verseText = (s, v) => `${plain(s, v)} ﴿${ar(v)}﴾${FR ? '\n' + FR[s - 1][v - 1] : ''}\n— ${sName(s)} ${s}:${v}`;
-function openVerse(s, v, el) {
-  el.classList.add('sel');
+/* ------------------------------------------------------------ définitions (mots, glossaire, explications) */
+const PARTS = new Map(), KIND = { mots: 'w', expl: 'f', ar: 'm' };
+function loadPart(k) {
+  if (!PARTS.has(k)) PARTS.set(k, fetch(`defs-${k}.json`).then(r => { if (!r.ok) throw 0; return r.json(); }).catch(e => { PARTS.delete(k); throw e; }));
+  return PARTS.get(k);
+}
+let ROOTS = null;
+function loadRoots() {
+  if (!ROOTS) ROOTS = fetch('roots.json').then(r => { if (!r.ok) throw 0; return r.json(); }).catch(e => { ROOTS = null; throw e; });
+  return ROOTS;
+}
+const TYPES = { V: 'verbe', Va: 'verbe · accompli', Vi: 'verbe · inaccompli', Vm: 'verbe · impératif', N: 'nom', Np: 'nom propre', Na: 'participe actif', Nm: 'participe passif',
+  Nv: 'nom d’action (maṣdar)', Nd: 'démonstratif', Nr: 'pronom relatif', Nq: 'pronom', Nt: 'adverbe de temps', Nl: 'adverbe de lieu', Nc: 'mot de condition', Ni: 'mot interrogatif',
+  Nj: 'adjectif', P: 'particule', Pp: 'préposition', Pc: 'conjonction', Pn: 'négation', Pi: 'particule interrogative', Pk: 'particule de condition', Pv: 'particule d’appel', Pf: 'particule du futur' };
+const parseW = str => { const [root, lem, c] = str.split('|'); return { root, lem, type: TYPES[c] || '' }; };
+const nrm = t => normAr(t.replace(/[ ⁠​-‏﴿﴾]/g, ''));
+const hitEntry = (tokN, key) => !!key && nrm(key).split(' ').some(k => k && (k === tokN || (k.length >= 3 && tokN.length >= 3 && (tokN.endsWith(k) || k.endsWith(tokN)))));
+const spaced = r => r.split('').join(' ');
+const paras = (t, cls) => t ? t.split('\n').filter(x => x.trim()).map(p => `<p class="${cls}">${esc(p)}</p>`).join('') : '<p class="hint">Aucune explication pour ce verset.</p>';
+const glList = (items, hit) => items.map(([k, m]) => `<div class="e${hit ? ' hit' : ''}">${k ? `<div class="k">${esc(k)}</div>` : ''}<div class="m">${esc(m)}</div></div>`).join('');
+function openVerse(s, v, el, wi) {
+  const toks = unitsOf(Q.t[s - 1][v - 1]).map(u => u.w);
+  let tab = wi != null ? 'mots' : store.get('q.tab', 'mots'); const P = {}, pend = new Set();
   const sh = openSheet(`<h2><span>${esc(sName(s))} · ${s}:${v}</span><button data-close aria-label="Fermer">${ic('x')}</button></h2>
-    <p class="sar" id="sa">${plain(s, v)}</p>${FR ? `<p class="sfr">${esc(FR[s - 1][v - 1])}</p>` : ''}
-    <div class="acts"><button class="btn ${isFav(s, v) ? 'on' : ''}" id="sf">${ic('star')}<span>${isFav(s, v) ? 'Favori' : 'Ajouter aux favoris'}</span></button>
-    <button class="btn" id="sc">${ic('copy')} Copier</button><button class="btn" id="sm">${ic('pin')} Reprendre ici</button></div>`);
-  $('#sf', sh).onclick = () => { const on = toggleFav(s, v); el.classList.toggle('fav', on); closeSheet(); toast(on ? 'Ajouté aux favoris' : 'Retiré des favoris'); };
+    <p class="sar" id="sa">${toks.map((w, i) => `<span class="w" data-w="${i}">${w}</span>`).join(' ')}</p>${FR ? `<p class="sfr">${esc(FR[s - 1][v - 1])}</p>` : ''}
+    <div class="acts sm"><button class="btn ${isFav(s, v) ? 'on' : ''}" id="sf">${ic('star')}<span>Favori</span></button>
+    <button class="btn" id="sc">${ic('copy')} Copier</button><button class="btn" id="sm">${ic('pin')} Reprendre</button></div>
+    <div class="seg tabs" id="tb" role="group" aria-label="Définitions">${[['mots', 'Mots'], ['expl', 'Explication'], ['ar', 'Tafsir (ar)']].map(([k, l]) => `<button data-t="${k}" aria-pressed="${k === tab}">${l}</button>`).join('')}</div>
+    <div class="tc" id="tc"></div>`);
+  el?.classList.add('sel');
+  const tabMots = () => {
+    const items = P.w.g[s - 1][v - 1] || [], info = P.w.w[s - 1][v - 1] || [];
+    let h = '', hits = [], rest = items;
+    if (wi != null && toks[wi]) {
+      const tn = nrm(toks[wi]); hits = items.filter(([k]) => hitEntry(tn, k)); rest = items.filter(x => !hits.includes(x));
+      const mw = info[wi] ? parseW(info[wi]) : null;
+      h += `<div class="wc"><div class="wt"><span class="wa">${toks[wi]}</span><span class="ty">${mw ? esc(mw.type) : ''}</span></div>`
+        + (mw && (mw.root || mw.lem) ? `<dl>${mw.root ? `<dt>Racine</dt><dd>${spaced(mw.root)}</dd>` : ''}${mw.lem ? `<dt>Forme de base</dt><dd>${mw.lem}</dd>` : ''}</dl>` : '')
+        + (mw && mw.root ? `<button class="btn" id="rt" data-root="${esc(mw.root)}">Versets avec cette racine</button>` : '') + '</div>';
+      h += hits.length ? `<div class="gl"><h3>Sens dans le glossaire</h3>${glList(hits, true)}</div>`
+        : `<p class="hint2">${items.length ? 'Ce mot n’a pas d’entrée propre dans le glossaire de ce verset.' : 'Aucun mot de ce verset n’est glosé dans le glossaire.'}</p>`;
+    } else h += '<p class="hint">Touche un mot du verset ci-dessus pour voir sa racine, sa nature et son entrée de glossaire.</p>';
+    if (rest.length) h += `<div class="gl"><h3>${wi != null ? 'Autres mots glosés du verset' : 'Mots glosés du verset'}</h3>${glList(rest, false)}</div>`;
+    else if (wi == null && !items.length) h += '<p class="hint2">Aucun mot de ce verset n’est glosé dans le glossaire.</p>';
+    return h + '<p class="src">Glossaire : Al-Muyassar fi al-gharib (en arabe). Racines et formes : Quranic Arabic Corpus. Pas de traduction mot à mot en français : voir l’onglet Explication.</p>';
+  };
+  const draw = () => {
+    $$('#tb button', sh).forEach(b => b.setAttribute('aria-pressed', b.dataset.t === tab));
+    $$('#sa .w', sh).forEach(n => n.classList.toggle('sel', +n.dataset.w === wi));
+    const tc = $('#tc', sh);
+    const k = KIND[tab];
+    if (!(k in P)) { if (!pend.has(k)) { pend.add(k); loadPart(k).then(d => { P[k] = d; }).catch(() => { P[k] = false; }).finally(() => { pend.delete(k); draw(); }); } tc.innerHTML = '<p class="hint">Chargement…</p>'; return; }
+    if (P[k] === false) { tc.innerHTML = '<p class="hint">Définitions indisponibles pour l’instant. Elles se téléchargent à la première consultation (connexion nécessaire). Dans Réglages, on peut tout télécharger pour lire hors ligne.</p>'; return; }
+    if (tab === 'expl') tc.innerHTML = paras(P.f[s - 1][v - 1], 'fr') + '<p class="src">Al-Mukhtasar : explication abrégée du Coran, traduction française. Texte de la source, non relu.</p>';
+    else if (tab === 'ar') tc.innerHTML = (P.m[s - 1][v - 1] ? paras(P.m[s - 1][v - 1], 'rtl') : '<p class="hint">Aucun tafsir pour ce verset.</p>') + '<p class="src">Tafsir al-Muyassar, en arabe.</p>';
+    else {
+      tc.innerHTML = tabMots();
+      const rt = $('#rt', tc);
+      if (rt) loadRoots().then(R => { const n = (R[rt.dataset.root] || []).length; if (!rt.isConnected) return; if (n > 1) rt.textContent = `Voir les ${n} versets avec cette racine`; else rt.remove(); }).catch(() => {});
+    }
+  };
+  sh.addEventListener('click', e => {
+    const w = e.target.closest('#sa .w');
+    if (w) { const i = +w.dataset.w; wi = wi === i ? null : i; tab = 'mots'; draw(); return; }
+    const t = e.target.closest('[data-t]');
+    if (t) { tab = t.dataset.t; store.set('q.tab', tab); if (P[KIND[tab]] === false) delete P[KIND[tab]]; draw(); return; }
+    const rt = e.target.closest('#rt');
+    if (rt) { state.rootFrom = { h: location.hash.slice(1), s, v }; const r = rt.dataset.root; closeSheet(); go('racine-' + r); }
+  });
+  $('#sf', sh).onclick = () => { const on = toggleFav(s, v); el?.classList.toggle('fav', on); closeSheet(); toast(on ? 'Ajouté aux favoris' : 'Retiré des favoris'); };
   $('#sc', sh).onclick = () => copyText(verseText(s, v), $('#sa', sh));
   $('#sm', sh).onclick = () => { saveLast(s, v); closeSheet(); toast('Position enregistrée'); };
+  draw();
+}
+function viewRoot(root) {
+  const back = state.rootFrom;
+  app.innerHTML = `<div class="rbar"><button class="ib" id="rb" aria-label="Retour">${ic('back')}</button><div class="tt"><span class="ar">${esc(spaced(root))}</span><small>Versets contenant cette racine</small></div><span class="spc"></span></div>
+    <div id="out"><div class="load">Chargement…</div></div>`;
+  $('#rb').onclick = () => { if (back) go(back.h, { s: back.s, v: back.v }); else location.hash = ''; };
+  setNav('');
+  const gToSV = g => { let s = 1; while (g >= sCount(s)) { g -= sCount(s); s++; } return [s, g + 1]; };
+  const cut = (t, n) => t.length > n ? t.slice(0, n) + '…' : t;
+  loadRoots().then(R => {
+    const list = R[root] || [], out = $('#out'); let shown = 0;
+    if (!list.length) { out.innerHTML = '<div class="empty"><span class="big">﴾ ﴿</span>Aucun verset pour cette racine.</div>'; return; }
+    out.innerHTML = `<div class="hint">${list.length} verset${list.length > 1 ? 's' : ''}</div><div id="rl"></div><button class="more" id="mr"></button>`;
+    const more = () => {
+      const part = list.slice(shown, shown + 50); shown += part.length;
+      $('#rl').insertAdjacentHTML('beforeend', part.map(g => { const [s, v] = gToSV(g);
+        return `<button class="res" data-go="sourate-${s}-${v}"><span class="rf">${esc(sName(s))} · ${s}:${v}</span><span class="ra">${esc(cut(plain(s, v), 170))}</span>${FR ? `<span class="rt">${esc(cut(FR[s - 1][v - 1], 200))}</span>` : ''}</button>`; }).join(''));
+      const mr = $('#mr'); if (shown >= list.length) mr.remove(); else mr.textContent = `Afficher la suite (${list.length - shown})`;
+    };
+    $('#mr').onclick = more; more(); restoreScroll();
+  }).catch(() => { $('#out').innerHTML = '<div class="empty"><span class="big">!</span>Liste indisponible (hors connexion ?).<br>Elle se télécharge à la première consultation.</div>'; });
 }
 function saveLast(s, v) {
   last = { h: location.hash.slice(1) || `sourate-${s}`, s, v, ts: Date.now() };
@@ -470,6 +591,9 @@ function viewFavs() {
 }
 
 /* ------------------------------------------------------------ réglages */
+async function defCached() {
+  try { let n = 0; for (const k of await caches.keys()) { if (!k.startsWith('mushaf-')) continue; for (const r of await (await caches.open(k)).keys()) if (/\/defs-[wfm]\.json$|\/roots\.json$/.test(r.url)) n++; } return n; } catch (e) { return 0; }
+}
 function openSettings() {
   const sk = [['auto', 'Auto'], ['light', 'Clair'], ['sepia', 'Sépia'], ['dark', 'Sombre']];
   const sh = openSheet(`<h2><span>Réglages</span><button data-close aria-label="Fermer">${ic('x')}</button></h2>
@@ -479,8 +603,10 @@ function openSettings() {
       <button data-v="verse" aria-pressed="${settings.mode === 'verse'}">Verset par verset</button></div></div>
     <div class="set sw"><div class="tx"><b>Traduction française</b><small>En mode verset par verset</small></div><button class="tg" id="tt" role="switch" aria-checked="${settings.tr}" aria-label="Traduction"></button></div>
     <div class="set sw"><div class="tx"><b>Signes de pause</b><small>Petits signes rouges au-dessus des mots</small></div><button class="tg" id="tw" role="switch" aria-checked="${settings.wq}" aria-label="Signes de pause"></button></div>
+    ${navigator.serviceWorker && navigator.serviceWorker.controller ? `<div class="set"><div class="lb">Définitions hors ligne</div><p class="about" id="dls" style="margin:0 0 8px">…</p><button class="btn" id="dlb" style="width:100%">Tout télécharger (environ 8 Mo)</button></div>` : ''}
     ${state.installEvt ? `<div class="set"><button class="btn pri" id="inst" style="width:100%">Installer l’appli</button></div>` : ''}
     <div class="set"><p class="about">Texte arabe : Tanzil (Uthmani), avec les signes de pause de QPC Hafs (Complexe du Roi Fahd). Traduction : Muhammad Hamidullah, via QuranEnc. Police : Amiri Quran.<br>
+    Définitions : glossaire Al-Muyassar fi al-gharib, Tafsir al-Muyassar (arabe) et Al-Mukhtasar (français), via le dépôt spa5k/tafsir_api (données Quran.com / QUL). Racines : Quranic Arabic Corpus (Université de Leeds), via mustafa0x/quran-morphology.<br>
     Version personnelle : le texte n’a pas été relu intégralement. À faire relire avant toute diffusion.</p></div>`);
   const seg = (id, key, after) => $(id, sh).addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return; settings[key] = b.dataset.v; saveSettings();
@@ -492,6 +618,20 @@ function openSettings() {
   const tog = (id, key) => $(id, sh).addEventListener('click', e => { settings[key] = !settings[key]; e.currentTarget.setAttribute('aria-checked', settings[key]); saveSettings(); applySettings();
     if (key === 'tr' && settings.mode === 'verse') rerender(); });
   tog('#tt', 'tr'); tog('#tw', 'wq');
+  const dlb = $('#dlb', sh);
+  if (dlb) {
+    const st = $('#dls', sh);
+    const show = async () => { const n = await defCached(); st.textContent = n >= 4 ? 'Toutes les définitions sont disponibles hors ligne.' : 'Les parties déjà consultées sont disponibles hors ligne.'; if (n >= 4) dlb.style.display = 'none'; };
+    show();
+    dlb.onclick = async () => {
+      dlb.disabled = true; let done = 0, fail = 0;
+      const urls = ['defs-w.json', 'defs-f.json', 'defs-m.json', 'roots.json'];
+      const work = async () => { while (urls.length) { const u = urls.shift(); try { const r = await fetch(u); if (!r.ok) throw 0; await r.arrayBuffer(); } catch (e) { fail++; } dlb.textContent = `Téléchargement… ${++done}/4`; } };
+      await Promise.all([work(), work()]);
+      dlb.disabled = false; dlb.textContent = 'Tout télécharger (environ 8 Mo)';
+      toast(fail ? `${fail} fichier(s) manquant(s) : réessaie` : 'Définitions téléchargées'); show();
+    };
+  }
   $('#inst', sh)?.addEventListener('click', async () => { try { state.installEvt.prompt(); await state.installEvt.userChoice; } catch (e) {} state.installEvt = null; closeSheet(); });
 }
 const rerender = () => { if (document.body.classList.contains('reading')) { topVerse(); render(true); } };
@@ -499,7 +639,7 @@ const topVerse = () => { const el = verseEls.find(e => e.getBoundingClientRect()
 
 /* ------------------------------------------------------------ navigation */
 function setNav(k) { $$('.nav button').forEach(b => { if (b.dataset.nav === k) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); }); }
-function go(h, pending) { if (!document.body.classList.contains('reading')) state.ys = window.scrollY; state.pending = pending || null; state.from = ['sourates', 'juz', 'hizb', 'recherche', 'favoris'].includes(location.hash.slice(1)) ? location.hash.slice(1) : (document.body.classList.contains('reading') ? state.from : ''); if (location.hash.slice(1) === h) render(); else location.hash = h; }
+function go(h, pending) { if (!document.body.classList.contains('reading')) state.ys = window.scrollY; state.pending = pending || null; state.from = ['sourates', 'juz', 'hizb', 'recherche', 'favoris'].includes(location.hash.slice(1)) || location.hash.slice(1).startsWith('racine-') ? location.hash.slice(1) : (document.body.classList.contains('reading') ? state.from : ''); if (location.hash.slice(1) === h) render(); else location.hash = h; }
 function render(keep) {
   if (keep !== true) closeSheet();
   app.onclick = null;
@@ -507,6 +647,8 @@ function render(keep) {
   const h = decodeURIComponent(location.hash.slice(1));
   const m = /^(sourate|juz|hizb)-(\d+)(?:-(\d+))?$/.exec(h);
   document.body.classList.toggle('reading', !!m && +m[2] >= 1 && +m[2] <= max[m[1]]);
+  const mr = /^racine-(.+)$/.exec(h);
+  if (mr) return viewRoot(mr[1]);
   if (m && +m[2] >= 1 && +m[2] <= max[m[1]]) {
     const v = m[3] ? +m[3] : null;
     if (m[1] === 'sourate' && v && (v < 1 || v > sCount(+m[2]))) { location.hash = `sourate-${m[2]}`; return; }
